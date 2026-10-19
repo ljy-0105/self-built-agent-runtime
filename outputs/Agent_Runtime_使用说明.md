@@ -4,10 +4,10 @@
 
 ## 打开当前服务
 
-当前本机实例运行在 `http://127.0.0.1:8001`：
+默认本地示例使用 `http://127.0.0.1:8000`：
 
-- Swagger 接口页面：<http://127.0.0.1:8001/docs>
-- 健康检查：<http://127.0.0.1:8001/healthz>
+- Swagger 接口页面：<http://127.0.0.1:8000/docs>
+- 健康检查：<http://127.0.0.1:8000/healthz>
 
 在 Swagger 中可以直接试用接口。先调用 `POST /sessions` 创建一个 session，再将返回的 `id` 用于 `POST /sessions/{session_id}/messages`。
 
@@ -35,10 +35,10 @@ if ([string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)) {
     throw 'OPENAI_API_KEY is not configured for this Windows user.'
 }
 
-.\.venv\Scripts\python.exe -m uvicorn app.api:app --host 127.0.0.1 --port 8001 --reload
+.\.venv\Scripts\python.exe -m uvicorn app.api:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-当前 8001 端口已有服务时，继续使用上面的地址即可，不要再启动第二个占用同一端口的实例。若要另开实例，把端口改成空闲端口，例如 `8002`，然后将示例请求中的地址同步改为该端口。
+若 8000 端口已被占用，可改用空闲端口，例如 `8002`，并将示例请求中的地址同步改为该端口。
 
 密钥只保存在本机环境变量中。不要把真实密钥写进 README、示例配置或提交到仓库。`.env` 虽被 Git 忽略，但应用不会自动加载它。
 
@@ -49,7 +49,7 @@ if ([string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)) {
 下面的 PowerShell 示例创建窗口 1 并发送消息：
 
 ```powershell
-$baseUrl = 'http://127.0.0.1:8001'
+$baseUrl = 'http://127.0.0.1:8000'
 $session = Invoke-RestMethod `
     -Method Post `
     -Uri "$baseUrl/sessions" `

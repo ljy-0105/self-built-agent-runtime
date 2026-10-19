@@ -34,6 +34,17 @@ def test_session_and_message_endpoints_persist_data(client):
     ]
 
 
+def test_root_serves_chinese_agent_workbench(client):
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert '<html lang="zh-CN">' in response.text
+    assert "新建对话" in response.text
+    assert "发送消息" in response.text
+    assert 'href="/docs"' in response.text
+
+
 def test_api_does_not_expose_sessions_to_another_identity(tmp_path):
     identity = {"user_id": "user-a"}
     app = create_app(

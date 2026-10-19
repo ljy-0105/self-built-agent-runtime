@@ -1,9 +1,11 @@
 import os
 from collections.abc import Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
 from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, status
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.llm_client import LLMClient
@@ -115,6 +117,10 @@ def create_app(
         else None
     )
     application.state.current_user_provider = current_user_provider
+
+    @application.get("/", include_in_schema=False)
+    def workbench() -> FileResponse:
+        return FileResponse(Path(__file__).parent / "static" / "index.html")
 
     @application.get("/healthz")
     def healthz() -> dict[str, str]:

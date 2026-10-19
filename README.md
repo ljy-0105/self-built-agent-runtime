@@ -2,7 +2,7 @@
 
 这是一个基于 Python、FastAPI 和 SQLite 实现的轻量 Agent Runtime 示例。Agent 的决策循环、响应解析、工具注册与参数校验、session 管理和上下文压缩均由项目实现，不依赖 LangGraph、OpenHands、OpenClaw 或其他 Agent Runtime 框架。
 
-模型通过 OpenAI Chat Completions 兼容适配器接入 DeepSeek。已使用真实 DeepSeek API 验证模型直接回复和工具调用：模型通过 `calculator` 计算 `12 * (3 + 1)`，Runtime 执行工具并把 `48` 返回给模型后生成最终答复。
+模型通过 OpenAI Chat Completions 兼容适配器接入。设置 DeepSeek 的模型名和 API 地址后即可连接 DeepSeek。已使用真实 DeepSeek API 验证模型直接回复和工具调用：模型通过 `calculator` 计算 `12 * (3 + 1)`，Runtime 执行工具并把 `48` 返回给模型后生成最终答复。
 
 ## 环境要求
 
@@ -18,30 +18,32 @@ python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 
 $env:OPENAI_API_KEY = [Environment]::GetEnvironmentVariable('OPENAI_API_KEY', 'User')
-$env:OPENAI_MODEL = [Environment]::GetEnvironmentVariable('OPENAI_MODEL', 'User')
-$env:OPENAI_BASE_URL = [Environment]::GetEnvironmentVariable('OPENAI_BASE_URL', 'User')
+$env:OPENAI_MODEL = 'deepseek-chat'
+$env:OPENAI_BASE_URL = 'https://api.deepseek.com/v1'
 $env:AGENT_DB_PATH = 'agent.sqlite3'
 
 if ([string]::IsNullOrWhiteSpace($env:OPENAI_API_KEY)) {
     throw 'OPENAI_API_KEY is not configured for this Windows user.'
 }
 
-.\.venv\Scripts\python.exe -m uvicorn app.api:app --host 127.0.0.1 --port 8001 --reload
+.\.venv\Scripts\python.exe -m uvicorn app.api:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-这会从 Windows 当前用户环境变量读取 API Key、模型名和兼容接口地址，不会把密钥写入仓库。当前本机实例地址为 <http://127.0.0.1:8001>，Swagger 页面为 <http://127.0.0.1:8001/docs>。若端口已被占用，可改用其他空闲端口，并同步更新请求地址。
+请先把 API Key 配置到 Windows 当前用户环境变量 `OPENAI_API_KEY`；上面的命令从该环境变量读取密钥，并在当前 PowerShell 会话中设置 DeepSeek 模型名和兼容接口地址，不会把密钥写入仓库。若你已将模型名和地址持久化到用户环境变量，也可以改为从用户环境变量读取。默认示例端口为 `8000`；若端口已被占用，可改用其他空闲端口。
+
+启动服务后打开 <http://127.0.0.1:8000> 使用中文 Agent 工作台。页面支持创建和切换独立 session、查看历史消息、发送追问，并查看工具调用及执行结果；<http://127.0.0.1:8000/docs> 保留为 API 调试文档。
 
 配置项如下：
 
 | 环境变量 | 当前值/默认值 | 用途 |
 | --- | --- | --- |
 | `OPENAI_API_KEY` | 本机用户环境变量 | DeepSeek API 密钥；不得提交到仓库。 |
-| `OPENAI_MODEL` | `deepseek-chat` | 使用的模型。 |
-| `OPENAI_BASE_URL` | `https://api.deepseek.com/v1` | OpenAI Chat Completions 兼容 API 地址。 |
+| `OPENAI_MODEL` | `gpt-4o-mini` | 使用的模型；使用 DeepSeek 时设为 `deepseek-chat`。 |
+| `OPENAI_BASE_URL` | `https://api.openai.com/v1` | OpenAI Chat Completions 兼容 API 地址；使用 DeepSeek 时设为 `https://api.deepseek.com/v1`。 |
 | `AGENT_DB_PATH` | `agent.sqlite3` | SQLite 数据库文件路径。 |
 | `AGENT_DEV_USER_ID` | `local-user` | 本地开发身份标识。 |
 
-应用从进程环境变量读取配置，不会自动加载 `.env`。`.env` 已加入 `.gitignore`，`.env.example` 只包含占位配置。
+应用从进程环境变量读取配置，不会自动加载 `.env`。`.env` 已加入 `.gitignore`；`.env.example` 是配置参考文件，只含占位密钥，程序不会自动读取它。
 
 ## 使用 API
 
@@ -72,7 +74,7 @@ POST /sessions/{session_id}/messages
 
 ```mermaid
 flowchart LR
-    Client[客户端 / Swagger] --> API[FastAPI]
+    Client[中文工作台 / API 客户端] --> API[FastAPI]
     API --> Runtime[自研 AgentRuntime]
     Runtime --> Context[ContextBuilder]
     Context --> LLM[LLMClient / DeepSeek]
