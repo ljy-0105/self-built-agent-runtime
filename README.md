@@ -142,3 +142,4 @@ ContextBuilder 在每次模型决策前运行。用户当前消息会先写入�
 - [本地使用说明](outputs/Agent_Runtime_使用说明.md)
 - [开发实施指南](outputs/Agent_Runtime_开发实施指南.md)
 - [AI Prompt 与问题解决记录](outputs/AI_Prompt_与问题解决记录.md)
+- [架构设计题](outputs/架构设计题.md)
